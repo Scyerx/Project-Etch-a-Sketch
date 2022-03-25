@@ -11,7 +11,8 @@ function setCurrentColor(newColor) {
 }
 
 function setCurrentMode(newMode) {
-    currentMode = newMode       
+    currentMode = newMode;
+    activateButton(newMode);       
 }
 
 const gameDisplay = document.getElementById('container');
@@ -27,6 +28,10 @@ rainbowButton.onclick = () => setCurrentMode('rainbow');
 clearButton.addEventListener("click", clear)
 gridButton.addEventListener("click", changeGrid);
 
+let mouseDown = false;
+document.body.onmousedown = () => (mouseDown = true);
+document.body.onmouseup = () => (mouseDown = false);
+
 function createGrid(currentSize) {
     for (a = 0; a < (currentSize * currentSize); a++) {
         const squares = document.createElement('div');
@@ -34,7 +39,8 @@ function createGrid(currentSize) {
         gameDisplay.appendChild(squares);
     }
     const squares = gameDisplay.querySelectorAll('div');
-    squares.forEach(squares => squares.addEventListener ('mouseenter', paint));
+    squares.forEach(squares => squares.addEventListener ('mouseover', paint));
+    squares.forEach(squares => squares.addEventListener ('mousedown', paint));
 }
 
 function changeGrid(){
@@ -46,10 +52,12 @@ function changeGrid(){
         square.remove();
     })
     createGrid(currentSize);    
-    squares.forEach(squares => squares.addEventListener ('mouseenter', paint));
+    squares.forEach(squares => squares.addEventListener ('mouseover', paint));
+    squares.forEach(squares => squares.addEventListener ('mousedown', paint));
 }
 
 function paint(e) {
+    if (e.type ==='mouseover' && !mouseDown) return
     if (currentMode === 'rainbow') {
       e.target.style.backgroundColor = randomColor();
     } else if (currentMode === 'color') {
@@ -75,4 +83,19 @@ function clear () {
     }    
 }
 
+function activateButton(newMode) {
+    if (currentMode === 'rainbow') {
+        colorButton.classList.remove('active');
+    } else if (currentMode === 'color') {
+        rainbowButton.classList.remove('active')
+    }
+
+    if (currentMode === 'rainbow') {
+        rainbowButton.classList.add('active');
+    } else if (currentMode === 'color') {
+        colorButton.classList.add('active')
+    }
+}
+
 createGrid(currentSize);
+activateButton(DEFAULT_MODE)
